@@ -77,6 +77,11 @@ double average(const std::vector<int>& values) {
 },
 }
 
+def extract_docstring(response: str) -> str:
+    start = response.find("<<<DOCSTRING_START>>>")
+    end = response.find("<<<DOCSTRING_END>>>")
+    response = response[start + len("<<<DOCSTRING_START>>>"):end]
+    return response
 
 def generate(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 120, temperature: float = 0.2) -> str:
     """
@@ -116,7 +121,7 @@ def generate(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 120, temper
         )
     response.raise_for_status()
 
-    return response.json()["response"].strip()
+    return extract_docstring(response.json()["response"].strip())
 
 
 def build_docstring_prompt(name: str, source_code: str, language: str, convention: str, kind: str) -> str:
