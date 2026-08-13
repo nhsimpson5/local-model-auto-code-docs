@@ -80,6 +80,10 @@ double average(const std::vector<int>& values) {
 def extract_docstring(response: str) -> str:
     start = response.find("<<<DOCSTRING_START>>>")
     end = response.find("<<<DOCSTRING_END>>>")
+    if start == -1 or end == -1 or end < start:
+        raise RuntimeError(
+            "Model didnt follow docstring marker instructions"
+        )
     response = response[start + len("<<<DOCSTRING_START>>>"):end]
     return response
 

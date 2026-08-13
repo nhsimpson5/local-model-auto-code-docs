@@ -55,6 +55,5 @@ def main():
         print("-"*40)
         print("\n")
 
-    print(len("<<<DOCSTRING_START>>>"))
 if __name__ == "__main__":
     main()
