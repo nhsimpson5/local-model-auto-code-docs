@@ -46,13 +46,33 @@ def scan_python_file(file_path: str) -> List[CodeUnit]:
 
     units = []
     for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-            kind = "Class" if isinstance(node, ast.ClassDef) else "Function"
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            snippet = ""
+            kind = "Function"
             start = node.lineno
             end = getattr(node, "end_lineno", start)
-            snippet = "".join(source_lines[start - 1:end])
-            print("---------------------------\n")
-            print(snippet)
+            snippet += "".join(source_lines[start - 1:end])
+            units.append(CodeUnit(
+                name=node.name,
+                kind=kind,
+                file_path=file_path,
+                start_line=start,
+                end_line=end,
+                source=snippet,
+                language="python",
+                existing_doc=ast.get_docstring(node),
+            ))
+        elif isinstance(node, ast.ClassDef):
+            snippet = ""
+            kind = "Class"
+            start = node.lineno
+            end = getattr(node, "end_lineno", start)
+            method_start = start
+            for method in node.body:
+                snippet += "".join(source_lines[method_start-1:method.lineno])
+                snippet += "\t...\n"
+                method_start = method.end_lineno + 1
+            snippet += "".join(source_lines[method_start-1:end])
             units.append(CodeUnit(
                 name=node.name,
                 kind=kind,
@@ -105,6 +125,19 @@ def scan_c_family_file(file_path: str) -> List[CodeUnit]:
             raw_name = source_bytes[name_node.start_byte:name_node.end_byte].decode("utf-8", "ignore")
             name = raw_name.split("(")[0].strip() or "<anonymous>"
             snippet = source_bytes[node.start_byte:node.end_byte].decode("utf-8", "ignore")
+            for child in node.children:
+                if child.type == "field_declaration_list":
+                    snippet = ""
+                    cursor = node.start_byte
+                    member_body_range = []
+                    for member in child.children:
+                        if member.type == "function_definition":
+                            body_node = member.child_by_field_name("body")
+                            member_body_range.append([body_node.start_byte, body_node.end_byte])
+                    for body in member_body_range:
+                        snippet = snippet + source_bytes[cursor :body[0]].decode("utf-8", "ignore") + "{ ... }"
+                        cursor = body[1]
+                    snippet = snippet + source_bytes[cursor:node.end_byte].decode("utf-8", "ignore") 
             units.append(CodeUnit(
                 name=name,
                 kind="Function" if node.type == "function_definition" else "Class" if node.type == "class_specifier" else "Struct",

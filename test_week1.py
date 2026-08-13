@@ -41,21 +41,20 @@ def main():
         doc_status = "has docstring" if u.existing_doc else "no docstring"
         print(f"  [{u.kind}] {u.name}  ({u.file_path}:{u.start_line}-{u.end_line})  [{doc_status}]")
 
-    print(f"\n{' Generating docstrings... ':-^40}\n")
-    for target_unit in units:
-        prompt = build_docstring_prompt(target_unit.name, target_unit.source, _CONVENTION_BY_LANGUAGE_[target_unit.language], target_unit.kind)
+    # print(f"\n{' Generating docstrings... ':-^40}\n")
+    # for target_unit in units:
+    #     prompt = build_docstring_prompt(target_unit.name, target_unit.source, target_unit.language, _CONVENTION_BY_LANGUAGE_[target_unit.language], target_unit.kind)
 
-        try:
-            result = generate(prompt)
-            print(f"{target_unit.kind}: {target_unit.name}\n")
-            print(result)
-        except (ConnectionError, RuntimeError) as e:
-            print(f"LLM call failed: {e}")
-        print("\n")
-        print("-"*40)
-        print("\n")
-
-
+    #     try:
+    #         result = generate(prompt)
+    #         print(f"{target_unit.kind}: {target_unit.name}\n")
+    #         print(result)
+    #     except (ConnectionError, RuntimeError) as e:
+    #         print(f"LLM call failed: {e}")
+    #     print("\n")
+    #     print("-"*40)
+    #     print("\n")
+    # print(prompt)
 
 if __name__ == "__main__":
     main()
