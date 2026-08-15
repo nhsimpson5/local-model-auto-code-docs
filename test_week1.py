@@ -16,6 +16,7 @@ import sys
 
 from scanner import scan_codebase
 from ollama_client import generate, build_docstring_prompt
+from doc_writer import write_to_doc, setup_docs_folder
 
 _CONVENTION_BY_LANGUAGE_ = {
     "python": "Google",
@@ -25,6 +26,8 @@ _CONVENTION_BY_LANGUAGE_ = {
 
 def main():
     target = sys.argv[1] if len(sys.argv) > 1 else "sample_code"
+
+    units_by_file = {}
 
     print(f"Scanning: {target}\n")
     units = scan_codebase(target)
@@ -38,22 +41,29 @@ def main():
 
     print(f"Found {len(units)} functions/classes:\n")
     for u in units:
+        if u.file_path not in units_by_file:
+            units_by_file[u.file_path] = []
+        units_by_file[u.file_path].append(u)
+
         doc_status = "has docstring" if u.existing_doc else "no docstring"
         print(f"  [{u.kind}] {u.name}  ({u.file_path}:{u.start_line}-{u.end_line})  [{doc_status}]")
 
-    print(f"\n{' Generating docstrings... ':-^40}\n")
-    for target_unit in units:
-        prompt = build_docstring_prompt(target_unit.name, target_unit.source, target_unit.language, _CONVENTION_BY_LANGUAGE_[target_unit.language], target_unit.kind)
+    print(f"\n{' Generating docstrings... ':-^60}\n")
+    setup_docs_folder()
 
-        try:
-            result = generate(prompt)
-            print(f"{target_unit.kind}: {target_unit.name}\n")
-            print(result)
-        except (ConnectionError, RuntimeError) as e:
-            print(f"LLM call failed: {e}")
-        print("\n")
-        print("-"*40)
-        print("\n")
+    for file in units_by_file:
+        unit_information = []
+        for target_unit in units_by_file[file]:
+            prompt = build_docstring_prompt(target_unit.name, target_unit.source, target_unit.language, _CONVENTION_BY_LANGUAGE_[target_unit.language], target_unit.kind)
 
+            try:
+                # result = ""
+                result = generate(prompt)
+            except (ConnectionError, RuntimeError) as e:
+                result = f"LLM call failed: {e}"
+            unit_information.append([target_unit.name,target_unit.kind,result])
+
+        write_to_doc(file, unit_information)
+            
 if __name__ == "__main__":
     main()

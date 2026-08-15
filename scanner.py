@@ -29,7 +29,7 @@ _IGNORED_DIR_NAMES = {".git", "__pycache__", "venv", ".venv", "node_modules", "b
 class CodeUnit:
     """One function or class found in the codebase."""
     name: str
-    kind: str  # "function" or "class"
+    kind: str 
     file_path: str
     start_line: int
     end_line: int
