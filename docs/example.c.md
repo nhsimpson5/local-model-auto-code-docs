@@ -15,6 +15,6 @@ find_max [Function] (lines: 7-15):
  *
  * @param values A pointer to the array of integers.
  * @param length The number of elements in the array.
- * @return The maximum value found in the array.
+ * @return The maximum integer value found in the array.
  */
 

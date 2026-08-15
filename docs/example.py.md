@@ -3,8 +3,8 @@ add_numbers [Function] (lines: 4-5):
 Adds two numbers together.
 
 Args:
-    a (int or float): The first number.
-    b (int or float): The second number.
+    a (int or float): The first number to add.
+    b (int or float): The second number to add.
 
 Returns:
     int or float: The sum of a and b.
@@ -54,7 +54,4 @@ Args:
 
 Returns:
     int: The updated count after incrementing.
-
-Raises:
-    None
 

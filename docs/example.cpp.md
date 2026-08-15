@@ -21,10 +21,10 @@ find_max [Function] (lines: 10-18):
 Counter [Class] (lines: 20-31):
 
 /**
- * @brief A simple counter class that can increment a count by a specified step.
+ * @brief A simple counter class that can increment its value.
  *
- * The Counter class provides functionality to increment a count starting from an initial value.
- * The increment method allows specifying a step size, defaulting to 1 if not provided.
+ * The Counter class provides functionality to increment a count by a specified step.
+ * The count can be initialized with a starting value.
  */
 
 Counter [Function] (lines: 22-22):
@@ -32,7 +32,7 @@ Counter [Function] (lines: 22-22):
 /**
  * @brief Constructs a Counter object with an optional starting count.
  *
- * @param start The initial count value for the Counter. Defaults to 0 if not provided.
+ * @param start The initial count value for the Counter. Defaults to 0.
  */
 
 increment [Function] (lines: 24-27):
@@ -47,12 +47,9 @@ increment [Function] (lines: 24-27):
 Point [Struct] (lines: 33-36):
 
 /**
- * @brief Represents a point in a 2D space with integer coordinates.
+ * @brief Represents a point in 2D space with integer coordinates.
  *
- * @var int Point::x
- *     The x-coordinate of the point.
- *
- * @var int Point::y
- *     The y-coordinate of the point.
+ * @param x The x-coordinate of the point.
+ * @param y The y-coordinate of the point.
  */
 
