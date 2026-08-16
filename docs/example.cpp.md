@@ -1,3 +1,5 @@
+------------------------------------------------------------
+
 add_numbers [Function] (lines: 6-8):
 
 /**
@@ -8,6 +10,8 @@ add_numbers [Function] (lines: 6-8):
  * @return The sum of the two integers.
  */
 
+------------------------------------------------------------
+
 find_max [Function] (lines: 10-18):
 
 /**
@@ -15,25 +19,31 @@ find_max [Function] (lines: 10-18):
  *
  * @param values A pointer to the array of integers.
  * @param length The number of elements in the array.
- * @return The maximum integer value in the array. Behavior is undefined if the array is empty.
+ * @return The maximum integer value found in the array. Behavior is undefined if the array is empty.
  */
+
+------------------------------------------------------------
 
 Counter [Class] (lines: 20-31):
 
 /**
- * @brief A simple counter class that can increment its value.
+ * @brief A simple counter class that can increment a count.
  *
  * The Counter class provides functionality to increment a count by a specified step.
- * The count can be initialized with a starting value.
+ * The count can be initialized to a starting value.
  */
+
+------------------------------------------------------------
 
 Counter [Function] (lines: 22-22):
 
 /**
  * @brief Constructs a Counter object with an optional starting count.
  *
- * @param start The initial count value for the Counter. Defaults to 0.
+ * @param start The initial count value for the Counter. Defaults to 0 if not provided.
  */
+
+------------------------------------------------------------
 
 increment [Function] (lines: 24-27):
 
@@ -44,12 +54,21 @@ increment [Function] (lines: 24-27):
  * @return The updated count after incrementing.
  */
 
+------------------------------------------------------------
+
 Point [Struct] (lines: 33-36):
 
 /**
- * @brief Represents a point in 2D space with integer coordinates.
+ * @brief Represents a 2D point with integer coordinates.
  *
- * @param x The x-coordinate of the point.
- * @param y The y-coordinate of the point.
+ * This struct holds the x and y coordinates of a point in a 2D space.
+ *
+ * @var int Point::x
+ * The x-coordinate of the point.
+ *
+ * @var int Point::y
+ * The y-coordinate of the point.
  */
+
+------------------------------------------------------------
 
