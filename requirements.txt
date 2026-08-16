@@ -1,2 +1,3 @@
 requests
 tree-sitter-language-pack
+PySide6
