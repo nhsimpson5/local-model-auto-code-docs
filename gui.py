@@ -24,12 +24,9 @@ class button():
 class folder_search_button(button):
     def __init__(self, name: str):
         super().__init__(name)
-        # self.main = QPushButton(name)
         self.chosen_folder_file_path = ""
         self.chosen_folder_name = ""
         self.chosen_folder_display = QLabel("No folder selected")
-        # self.main.clicked.connect(self.button_function)
-        # layout.addWidget(self.main)
         layout.addWidget(self.chosen_folder_display)
         
     def button_function(self):
