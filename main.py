@@ -1,13 +1,14 @@
 """
-test_week1.py
+main.py
 
-End-to-end smoke test for week 1:
-  1. Scan a folder for functions/classes/structs.
-  2. Print what was found.
-  3. Send them to the local LLM and print a generated docstring.
+Control flow:
+    1. Scan a folder for functions/classes/structs.
+    2. Print what was found.
+    3. Send them to the local LLM.
+    4. Send resulting docstrings to the doc_writer.
 
 Usage:
-    python test_week1.py [path_to_folder]
+    python main.py [path_to_folder]
 
 Defaults to ./sample_code if no path is given.
 """
@@ -34,12 +35,12 @@ def main():
 
     if not units:
         print(
-            "No functions or classes found. Check the path, or make sure "
+            "No functions/classes/structs found. Check the path, or make sure "
             "tree-sitter-languages is installed if you're scanning C/C++ files."
         )
         return
 
-    print(f"Found {len(units)} functions/classes:\n")
+    print(f"Found {len(units)} functions/classes/structs:\n")
     for u in units:
         if u.file_path not in units_by_file:
             units_by_file[u.file_path] = []
@@ -54,15 +55,16 @@ def main():
     for file in units_by_file:
         unit_information = []
         for target_unit in units_by_file[file]:
-            prompt = build_docstring_prompt(target_unit.name, target_unit.source, target_unit.language, _CONVENTION_BY_LANGUAGE_[target_unit.language], target_unit.kind)
-
-            try:
-                # result = ""
-                result = generate(prompt)
-            except (ConnectionError, RuntimeError) as e:
-                result = f"LLM call failed: {e}"
-            unit_information.append([target_unit.name,target_unit.kind,result])
-
+            
+            if target_unit.existing_doc is None:
+                prompt = build_docstring_prompt(target_unit.name, target_unit.source, target_unit.language, _CONVENTION_BY_LANGUAGE_[target_unit.language], target_unit.kind)           
+                try:
+                    result = generate(prompt)
+                except (ConnectionError, RuntimeError) as e:
+                    result = f"LLM call failed: {e}"
+            else:
+                result = target_unit.existing_doc
+            unit_information.append([target_unit.name, target_unit.kind, target_unit.start_line, target_unit.end_line, result])
         write_to_doc(file, unit_information)
             
 if __name__ == "__main__":

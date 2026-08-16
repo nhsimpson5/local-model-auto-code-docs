@@ -27,7 +27,7 @@ _IGNORED_DIR_NAMES = {".git", "__pycache__", "venv", ".venv", "node_modules", "b
 
 @dataclass
 class CodeUnit:
-    """One function or class found in the codebase."""
+    """One function/class/struct found in the codebase."""
     name: str
     kind: str 
     file_path: str
@@ -155,7 +155,7 @@ def scan_c_family_file(file_path: str) -> List[CodeUnit]:
 
 
 def scan_codebase(root_dir: str) -> List[CodeUnit]:
-    """Walk a directory and extract all functions/classes from supported file types."""
+    """Walk a directory and extract all functions/classes/structs from supported file types."""
     all_units: List[CodeUnit] = []
     for dirpath, dirnames, filenames in os.walk(root_dir):
         dirnames[:] = [d for d in dirnames if d not in _IGNORED_DIR_NAMES]
