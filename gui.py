@@ -1,7 +1,7 @@
 import sys
 import os
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QObject, QThread, Signal
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel, QComboBox
 from pipeline import run_pipeline, CONVENTION_BY_LANGUAGE
 
@@ -52,6 +52,23 @@ class folder_button(button):
         self.chosen_folder_display.setText(f"Folder: {self.chosen_folder_name}")
 
 
+class PipelineWorker(QObject):
+    finished = Signal()
+    error = Signal(str)
+
+    def __init__(self, target_folder, convention_by_language):
+        super().__init__()
+        self.target_folder = target_folder
+        self.convention_by_language = convention_by_language
+
+    def run(self):
+        try:
+            run_pipeline(self.target_folder, self.convention_by_language)
+        except Exception as e:
+            self.error.emit(str(e))
+        self.finished.emit()
+
+
 class run_button(button):
     def __init__(self, title:str, folder_button, python_dropdown, c_dropdown, cpp_dropdown, style=QVBoxLayout()):
         super().__init__(title, style)
@@ -62,19 +79,27 @@ class run_button(button):
         self.set_layout()
 
     def button_function(self):
-        try:
-            run_pipeline(self.folder_button.get_chosen_folder_file_path(), {
-                                                                            "python": self.python_dropdown.get_convention(), 
-                                                                            "c": self.c_dropdown.get_convention(), 
-                                                                            "cpp": self.cpp_dropdown.get_convention()
-                                                                            })
-        except Exception as e:
-            print(f"Pipeline failed: {e}")
+        folder = self.folder_button.get_chosen_folder_file_path()
+        conventions = {
+            "python": self.python_dropdown.get_convention(),
+            "c": self.c_dropdown.get_convention(),
+            "cpp": self.cpp_dropdown.get_convention(),
+        }
 
+        self.thread = QThread()
+        self.worker = PipelineWorker(folder, conventions)
+        self.worker.moveToThread(self.thread)
+
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.error.connect(lambda msg: print(f"Pipeline failed: {msg}"))
+
+        self.thread.start()
 
 
 class convention_drop_down_menu():
-    def __init__(self, title: str, items: tuple, style=QHBoxLayout()):
+    def __init__(self, title: str, items: tuple, style=None):
+        style = QHBoxLayout()
         self.main = QComboBox()
         self.title = QLabel(f"{title} conventions: ")
         self.main.addItems(items)
@@ -90,8 +115,8 @@ class convention_drop_down_menu():
             self.layout.addWidget(widget)
         self.layout.addStretch()
         layout.addLayout(self.layout)
-        
-        
+
+
 window.setWindowTitle("Auto Code Documentation & Formatting")
 folder_search_button = folder_button("Select Folder")
 python_convention_drop_down_menu = convention_drop_down_menu("Python", CONVENTION_BY_LANGUAGE["python"])

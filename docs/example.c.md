@@ -20,7 +20,7 @@ find_max [Function] (lines: 7-15):
 /**
  * @brief Finds the maximum value in an array of integers.
  *
- * @param values Pointer to the array of integers.
+ * @param values A pointer to the array of integers.
  * @param length The number of elements in the array.
  * @return The maximum integer value found in the array.
  */

@@ -20,7 +20,7 @@ find_max [Function] (lines: 10-18):
 /**
  * @brief Finds the maximum value in an array of integers.
  *
- * @param values Pointer to the array of integers.
+ * @param values A pointer to the array of integers.
  * @param length The number of elements in the array.
  * @return The maximum integer value in the array. Behavior is undefined if the array is empty.
  */
@@ -32,10 +32,10 @@ Counter [Class] (lines: 20-31):
 
 
 /**
- * @brief A simple counter class that can increment a count.
+ * @brief A simple counter class that can increment a count by a specified step.
  *
- * This class provides a basic counter functionality with the ability to start from a specified
- * initial value and increment by a given step.
+ * The Counter class provides a basic mechanism to count upwards from a starting value.
+ * It includes a method to increment the count by a specified step.
  */
 
 
@@ -57,10 +57,10 @@ increment [Function] (lines: 24-27):
 
 
 /**
- * @brief Increments a counter by a specified step.
+ * @brief Increments a global count by a specified step.
  *
- * @param step The amount to increment the counter by. Defaults to 1.
- * @return The new value of the counter after incrementing.
+ * @param step The amount to increment the count by. Defaults to 1.
+ * @return The updated count after incrementing.
  */
 
 
@@ -70,13 +70,13 @@ Point [Struct] (lines: 33-36):
 
 
 /**
- * @brief Represents a point in a 2D space with integer coordinates.
+ * @brief Represents a 2D point with integer coordinates.
  *
  * @var int Point::x
- * The x-coordinate of the point.
+ *     The x-coordinate of the point.
  *
  * @var int Point::y
- * The y-coordinate of the point.
+ *     The y-coordinate of the point.
  */
 
 
