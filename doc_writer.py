@@ -5,6 +5,7 @@ Writes the code unit information and the the generated docstrings to a .md file,
 files keep their original name and extensions to deal with duplicate names across 
 different file types
 """
+
 import os
 
 ROOT = os.path.dirname(os.path.abspath(__file__))

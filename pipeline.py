@@ -16,6 +16,8 @@ Defaults to ./sample_code if no path is given.
 from scanner import scan_codebase
 from ollama_client import generate, build_docstring_prompt
 from doc_writer import write_to_doc, setup_docs_folder
+from formatter import format_file
+from formatted_file_writer import setup_formatted_folder, write_to_formatted_folder
 
 CONVENTION_BY_LANGUAGE = {
     "python": ("Google",),
@@ -23,7 +25,7 @@ CONVENTION_BY_LANGUAGE = {
     "cpp": ("Doxygen",),
     }
 
-def run_pipeline(target_folder, convention_by_language):
+def run_pipeline(target_folder, format_check, convention_by_language):
     units_by_file = {}
 
     print(f"Scanning: {target_folder}\n")
@@ -47,6 +49,7 @@ def run_pipeline(target_folder, convention_by_language):
 
     print(f"\n{' Generating docstrings... ':-^60}\n")
     setup_docs_folder()
+    setup_formatted_folder()
 
     for file in units_by_file:
         unit_information = []
@@ -55,11 +58,22 @@ def run_pipeline(target_folder, convention_by_language):
             if target_unit.existing_doc is None:
                 prompt = build_docstring_prompt(target_unit.name, target_unit.source, target_unit.language, convention_by_language[target_unit.language], target_unit.kind)           
                 try:
-                    result = generate(prompt)
+                    docstring_result = generate(prompt)
                 except (ConnectionError, RuntimeError) as e:
-                    result = f"LLM call failed: {e}"
+                    docstring_result = f"LLM call failed: {e}"
             else:
-                result = target_unit.existing_doc
-            unit_information.append([target_unit.name, target_unit.kind, target_unit.start_line, target_unit.end_line, result])
+                docstring_result = target_unit.existing_doc
+            unit_information.append([target_unit.name, target_unit.kind, target_unit.start_line, target_unit.end_line, docstring_result])
+
         write_to_doc(file, unit_information)
+        if format_check:
+            try:
+                formatting_result = format_file(file, units_by_file[file][0].language)
+                write_to_formatted_folder(file, formatting_result)
+            except (FileNotFoundError,RuntimeError) as e:
+                if isinstance(e, FileNotFoundError):
+                    print(f"{e}: clang not installed, please install clang")
+                else:
+                    print(f"{e}")
+
     print("Done!")

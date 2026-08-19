@@ -1,3 +1,5 @@
 requests
 tree-sitter-language-pack
 PySide6
+black
+clang-format

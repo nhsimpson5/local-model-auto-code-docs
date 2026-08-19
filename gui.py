@@ -2,7 +2,7 @@ import sys
 import os
 
 from PySide6.QtCore import QObject, QThread, Signal
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel, QComboBox
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QFileDialog, QLabel, QComboBox, QCheckBox
 from pipeline import run_pipeline, CONVENTION_BY_LANGUAGE
 
 app = QApplication(sys.argv)
@@ -56,22 +56,24 @@ class PipelineWorker(QObject):
     finished = Signal()
     error = Signal(str)
 
-    def __init__(self, target_folder, convention_by_language):
+    def __init__(self, target_folder, format_check, convention_by_language):
         super().__init__()
         self.target_folder = target_folder
+        self.format_check = format_check
         self.convention_by_language = convention_by_language
 
     def run(self):
         try:
-            run_pipeline(self.target_folder, self.convention_by_language)
+            run_pipeline(self.target_folder,self.format_check, self.convention_by_language)
         except Exception as e:
             self.error.emit(str(e))
         self.finished.emit()
 
 
 class run_button(button):
-    def __init__(self, title:str, folder_button, python_dropdown, c_dropdown, cpp_dropdown, style=QVBoxLayout()):
+    def __init__(self, title:str, format_check, folder_button, python_dropdown, c_dropdown, cpp_dropdown, style=QVBoxLayout()):
         super().__init__(title, style)
+        self.format_check = format_check
         self.folder_button = folder_button
         self.python_dropdown = python_dropdown
         self.c_dropdown = c_dropdown
@@ -80,6 +82,7 @@ class run_button(button):
 
     def button_function(self):
         folder = self.folder_button.get_chosen_folder_file_path()
+        format_check = self.format_check.get_status()
         conventions = {
             "python": self.python_dropdown.get_convention(),
             "c": self.c_dropdown.get_convention(),
@@ -87,7 +90,7 @@ class run_button(button):
         }
 
         self.thread = QThread()
-        self.worker = PipelineWorker(folder, conventions)
+        self.worker = PipelineWorker(folder, format_check, conventions)
         self.worker.moveToThread(self.thread)
 
         self.thread.started.connect(self.worker.run)
@@ -116,13 +119,32 @@ class convention_drop_down_menu():
         self.layout.addStretch()
         layout.addLayout(self.layout)
 
+class format_check_box():
+    def __init__(self, style=None):
+        style = QHBoxLayout()
+        self.main = QCheckBox()
+        self.title = QLabel(f"Format code ? ")
+        self.layout = style
+        self.set_layout(self.title, self.main)
+
+    def set_layout(self, *widgets):
+        for widget in widgets:
+            self.layout.addWidget(widget)
+        self.layout.addStretch()
+        layout.addLayout(self.layout)
+
+    def get_status(self):
+        return self.main.isChecked()
+
 
 window.setWindowTitle("Auto Code Documentation & Formatting")
 folder_search_button = folder_button("Select Folder")
+format_code_check_box = format_check_box()
 python_convention_drop_down_menu = convention_drop_down_menu("Python", CONVENTION_BY_LANGUAGE["python"])
 c_convention_drop_down_menu = convention_drop_down_menu("C", CONVENTION_BY_LANGUAGE["c"])
 cpp_convention_drop_down_menu = convention_drop_down_menu("C++", CONVENTION_BY_LANGUAGE["cpp"])
-generate_docstring_button = run_button("Generate Docstrings", folder_search_button, python_convention_drop_down_menu, c_convention_drop_down_menu, cpp_convention_drop_down_menu)
+
+run_pipeline_button = run_button("Run",format_code_check_box, folder_search_button, python_convention_drop_down_menu, c_convention_drop_down_menu, cpp_convention_drop_down_menu)
 window.resize(250, 200)
 window.setLayout(layout)
 window.show()

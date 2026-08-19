@@ -40,7 +40,7 @@ class CodeUnit:
 
 def scan_python_file(file_path: str) -> List[CodeUnit]:
     """Extract functions/classes from a Python file using ast."""
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, 'r', encoding="utf-8") as f:
         source_lines = f.readlines()
     tree = ast.parse("".join(source_lines), filename=file_path)
 
