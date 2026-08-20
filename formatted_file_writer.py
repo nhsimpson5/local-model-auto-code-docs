@@ -16,6 +16,9 @@ def setup_formatted_folder():
 
 def write_to_formatted_folder(file_path: str, formatted_code: str):
     with open(
-        os.path.join(ROOT, "formatted_files", os.path.basename(file_path)), "w"
+        os.path.join(ROOT, "formatted_files", os.path.basename(file_path)),
+        "w",
+        encoding="utf-8",
+        newline="",
     ) as f:
         f.write(formatted_code)

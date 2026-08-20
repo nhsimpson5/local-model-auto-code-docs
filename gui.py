@@ -104,7 +104,16 @@ class run_button(button):
         self.cpp_dropdown = cpp_dropdown
         self.set_layout()
 
+    def disable_button(self):
+        self.main.setEnabled(False)
+        self.main.setText("Running...")
+        
+    def enable_button(self):
+        self.main.setEnabled(True)
+        self.main.setText("Run")
+
     def button_function(self):
+        self.disable_button()
         folder = self.folder_button.get_chosen_folder_file_path()
         format_check = self.format_check.get_status()
         conventions = {
@@ -119,11 +128,12 @@ class run_button(button):
 
         self.thread.started.connect(self.worker.run)
         self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.enable_button)
         self.worker.error.connect(lambda msg: print(f"Pipeline failed: {msg}"))
 
         self.thread.start()
 
-
+ 
 class convention_drop_down_menu:
     def __init__(self, title: str, items: tuple, style=None):
         style = QHBoxLayout()

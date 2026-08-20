@@ -50,12 +50,12 @@ def scan_python_file(file_path: str) -> List[CodeUnit]:
     except (SyntaxError, UnicodeDecodeError) as e:
         if isinstance(e, UnicodeDecodeError):
             print(f"{e}: {file_path}")
-        else: 
+        else:
             print(e)
         return []
 
     units = []
- 
+
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             snippet = ""

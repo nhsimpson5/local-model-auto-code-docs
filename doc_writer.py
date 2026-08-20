@@ -17,7 +17,10 @@ def setup_docs_folder():
 
 def write_to_doc(file_path: str, code_unit_information: list):
     with open(
-        os.path.join(ROOT, "docs", os.path.basename(file_path) + ".md"), "w"
+        os.path.join(ROOT, "docs", os.path.basename(file_path) + ".md"),
+        "w",
+        encoding="utf-8",
+        newline="",
     ) as f:
         f.write("-" * 100 + "\n\n")
         for unit in code_unit_information:

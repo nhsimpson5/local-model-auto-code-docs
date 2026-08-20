@@ -87,9 +87,11 @@ def run_pipeline(target_folder, format_check, convention_by_language):
             try:
                 formatting_result = format_file(file, units_by_file[file][0].language)
                 write_to_formatted_folder(file, formatting_result)
-            except (FileNotFoundError, RuntimeError) as e:
+            except (FileNotFoundError, RuntimeError, UnicodeDecodeError) as e:
                 if isinstance(e, FileNotFoundError):
                     print(f"{e}: clang not installed, please install clang")
+                elif isinstance(e, UnicodeDecodeError):
+                    print(f"{e}: file not utf-8 encoded")
                 else:
                     print(e)
 
