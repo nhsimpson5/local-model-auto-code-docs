@@ -16,12 +16,12 @@ DEFAULT_MODEL = "qwen2.5-coder:14b"
 
 _EXAMPLE_BY_CONVENTION = {
     "Google": {
-
         "python": [
-"""
+            """
 def divide(a, b):
     return a / b
-""","""
+""",
+            """
 <<<DOCSTRING_START>>>
 Divides one number by another.
 
@@ -35,16 +35,17 @@ Returns:
 Raises:
     ZeroDivisionError: If b is zero.
 <<<DOCSTRING_END>>>
-"""]
-},
+""",
+        ]
+    },
     "Doxygen": {
-
         "c": [
-"""
+            """
 int multiply(int a, int b) {
     return a * b;
 }
-""","""
+""",
+            """
 <<<DOCSTRING_START>>>
 /**
  * @brief Multiplies two integers.
@@ -54,9 +55,10 @@ int multiply(int a, int b) {
  * @return The product of a and b.
  */
 <<<DOCSTRING_END>>>
-"""],
-
-        "cpp": ["""
+""",
+        ],
+        "cpp": [
+            """
 double average(const std::vector<int>& values) {
     double sum = 0;
     for (int v : values) {
@@ -64,7 +66,8 @@ double average(const std::vector<int>& values) {
     }
     return sum / values.size();
 }
-""","""
+""",
+            """
 <<<DOCSTRING_START>>>
 /**
  * @brief Calculates the average of a list of integers.
@@ -73,21 +76,27 @@ double average(const std::vector<int>& values) {
  * @return The arithmetic mean of the values. Behavior is undefined if the vector is empty.
  */
 <<<DOCSTRING_END>>>
-"""]
-},
+""",
+        ],
+    },
 }
+
 
 def extract_docstring(response: str) -> str:
     start = response.find("<<<DOCSTRING_START>>>")
     end = response.find("<<<DOCSTRING_END>>>")
     if start == -1 or end == -1 or end < start:
-        raise RuntimeError(
-            "Model didnt follow docstring marker instructions"
-        )
-    response = response[start + len("<<<DOCSTRING_START>>>"):end]
+        raise RuntimeError("Model didnt follow docstring marker instructions")
+    response = response[start + len("<<<DOCSTRING_START>>>") : end]
     return response
 
-def generate(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 120, temperature: float = 0.2) -> str:
+
+def generate(
+    prompt: str,
+    model: str = DEFAULT_MODEL,
+    timeout: int = 120,
+    temperature: float = 0.2,
+) -> str:
     """
     Send a prompt to the local Ollama server and return the generated text.
 
@@ -106,9 +115,7 @@ def generate(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 120, temper
         "prompt": prompt,
         "system": "you are a precise technical documentation generator, you only output docstrings, never code or code markdown fences.",
         "stream": False,
-        "options": {
-            "temperature": temperature
-        }
+        "options": {"temperature": temperature},
     }
 
     try:
@@ -128,7 +135,9 @@ def generate(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 120, temper
     return extract_docstring(response.json()["response"].strip())
 
 
-def build_docstring_prompt(name: str, source_code: str, language: str, convention: str, kind: str) -> str:
+def build_docstring_prompt(
+    name: str, source_code: str, language: str, convention: str, kind: str
+) -> str:
     """
     Build a prompt asking the model to write a docstring for one function,
     in a given documentation convention (e.g. Google, NumPy, Doxygen).

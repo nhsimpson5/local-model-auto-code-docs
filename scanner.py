@@ -19,49 +19,62 @@ from typing import List, Optional
 
 try:
     from tree_sitter_language_pack import get_parser
+
     _TREE_SITTER_AVAILABLE = True
 except ImportError:
     _TREE_SITTER_AVAILABLE = False
 
 _IGNORED_DIR_NAMES = {".git", "__pycache__", "venv", ".venv", "node_modules", "build"}
 
+
 @dataclass
 class CodeUnit:
     """One function/class/struct found in the codebase."""
+
     name: str
-    kind: str 
+    kind: str
     file_path: str
     start_line: int
     end_line: int
     source: str
-    language : str
+    language: str
     existing_doc: Optional[str] = None
 
 
 def scan_python_file(file_path: str) -> List[CodeUnit]:
     """Extract functions/classes from a Python file using ast."""
-    with open(file_path, 'r', encoding="utf-8") as f:
-        source_lines = f.readlines()
-    tree = ast.parse("".join(source_lines), filename=file_path)
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            source_lines = f.readlines()
+        tree = ast.parse("".join(source_lines), filename=file_path)
+    except (SyntaxError, UnicodeDecodeError) as e:
+        if isinstance(e, UnicodeDecodeError):
+            print(f"{e}: {file_path}")
+        else: 
+            print(e)
+        return []
 
     units = []
+ 
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             snippet = ""
             kind = "Function"
             start = node.lineno
             end = getattr(node, "end_lineno", start)
-            snippet += "".join(source_lines[start - 1:end])
-            units.append(CodeUnit(
-                name=node.name,
-                kind=kind,
-                file_path=file_path,
-                start_line=start,
-                end_line=end,
-                source=snippet,
-                language="python",
-                existing_doc=ast.get_docstring(node),
-            ))
+            snippet += "".join(source_lines[start - 1 : end])
+            units.append(
+                CodeUnit(
+                    name=node.name,
+                    kind=kind,
+                    file_path=file_path,
+                    start_line=start,
+                    end_line=end,
+                    source=snippet,
+                    language="python",
+                    existing_doc=ast.get_docstring(node),
+                )
+            )
         elif isinstance(node, ast.ClassDef):
             snippet = ""
             kind = "Class"
@@ -69,20 +82,22 @@ def scan_python_file(file_path: str) -> List[CodeUnit]:
             end = getattr(node, "end_lineno", start)
             method_start = start
             for method in node.body:
-                snippet += "".join(source_lines[method_start-1:method.lineno])
+                snippet += "".join(source_lines[method_start - 1 : method.lineno])
                 snippet += "\t...\n"
                 method_start = method.end_lineno + 1
-            snippet += "".join(source_lines[method_start-1:end])
-            units.append(CodeUnit(
-                name=node.name,
-                kind=kind,
-                file_path=file_path,
-                start_line=start,
-                end_line=end,
-                source=snippet,
-                language="python",
-                existing_doc=ast.get_docstring(node),
-            ))
+            snippet += "".join(source_lines[method_start - 1 : end])
+            units.append(
+                CodeUnit(
+                    name=node.name,
+                    kind=kind,
+                    file_path=file_path,
+                    start_line=start,
+                    end_line=end,
+                    source=snippet,
+                    language="python",
+                    existing_doc=ast.get_docstring(node),
+                )
+            )
     return units
 
 
@@ -101,6 +116,7 @@ _TS_NAME_FIELD_BY_NODE_TYPE = {
     "class_specifier": "name",
     "struct_specifier": "name",
 }
+
 
 def scan_c_family_file(file_path: str) -> List[CodeUnit]:
     """Extract functions/classes/structs from a C or C++ file using tree-sitter."""
@@ -121,10 +137,16 @@ def scan_c_family_file(file_path: str) -> List[CodeUnit]:
 
     def walk(node):
         if node.type in _TS_UNIT_NODE_TYPES:
-            name_node = node.child_by_field_name(_TS_NAME_FIELD_BY_NODE_TYPE[node.type]) or node
-            raw_name = source_bytes[name_node.start_byte:name_node.end_byte].decode("utf-8", "ignore")
+            name_node = (
+                node.child_by_field_name(_TS_NAME_FIELD_BY_NODE_TYPE[node.type]) or node
+            )
+            raw_name = source_bytes[name_node.start_byte : name_node.end_byte].decode(
+                "utf-8", "ignore"
+            )
             name = raw_name.split("(")[0].strip() or "<anonymous>"
-            snippet = source_bytes[node.start_byte:node.end_byte].decode("utf-8", "ignore")
+            snippet = source_bytes[node.start_byte : node.end_byte].decode(
+                "utf-8", "ignore"
+            )
             for child in node.children:
                 if child.type == "field_declaration_list":
                     snippet = ""
@@ -133,20 +155,35 @@ def scan_c_family_file(file_path: str) -> List[CodeUnit]:
                     for member in child.children:
                         if member.type == "function_definition":
                             body_node = member.child_by_field_name("body")
-                            member_body_range.append([body_node.start_byte, body_node.end_byte])
+                            if body_node is not None:
+                                member_body_range.append(
+                                    [body_node.start_byte, body_node.end_byte]
+                                )
                     for body in member_body_range:
-                        snippet = snippet + source_bytes[cursor :body[0]].decode("utf-8", "ignore") + "{ ... }"
+                        snippet = (
+                            snippet
+                            + source_bytes[cursor : body[0]].decode("utf-8", "ignore")
+                            + "{ ... }"
+                        )
                         cursor = body[1]
-                    snippet = snippet + source_bytes[cursor:node.end_byte].decode("utf-8", "ignore") 
-            units.append(CodeUnit(
-                name=name,
-                kind="Function" if node.type == "function_definition" else "Class" if node.type == "class_specifier" else "Struct",
-                file_path=file_path,
-                start_line=node.start_point[0] + 1,
-                end_line=node.end_point[0] + 1,
-                source=snippet,
-                language=lang,
-            ))
+                    snippet = snippet + source_bytes[cursor : node.end_byte].decode(
+                        "utf-8", "ignore"
+                    )
+            units.append(
+                CodeUnit(
+                    name=name,
+                    kind=(
+                        "Function"
+                        if node.type == "function_definition"
+                        else "Class" if node.type == "class_specifier" else "Struct"
+                    ),
+                    file_path=file_path,
+                    start_line=node.start_point[0] + 1,
+                    end_line=node.end_point[0] + 1,
+                    source=snippet,
+                    language=lang,
+                )
+            )
         for child in node.children:
             walk(child)
 
