@@ -13,6 +13,7 @@ Usage:
 Defaults to ./sample_code if no path is given.
 """
 
+import os
 from scanner import scan_codebase
 from ollama_client import generate, build_docstring_prompt
 from doc_writer import write_to_doc, setup_docs_folder
@@ -20,13 +21,13 @@ from formatter import format_file
 from formatted_file_writer import setup_formatted_folder, write_to_formatted_folder
 
 CONVENTION_BY_LANGUAGE = {
-    "python": ("Google",),
-    "c": ("Doxygen",),
+    "python": ("Google", "NumPy", "Sphinx",),
+    "c": ("Doxygen", "Kernel-doc",),
     "cpp": ("Doxygen",),
 }
 
 
-def run_pipeline(target_folder, format_check, convention_by_language):
+def run_pipeline(target_folder, format_check, convention_by_language, on_progress = None):
     units_by_file = {}
 
     print(f"Scanning: {target_folder}\n")
@@ -54,10 +55,14 @@ def run_pipeline(target_folder, format_check, convention_by_language):
     setup_docs_folder()
     setup_formatted_folder()
 
+    if on_progress:
+        unit_total = len(units)
+        unit_complete = 0
     for file in units_by_file:
         unit_information = []
         for target_unit in units_by_file[file]:
-
+            if on_progress:
+                on_progress(unit_complete, unit_total, f"Generating docstring - {target_unit.name} [{target_unit.kind}] [{os.path.basename(file)}]")
             if target_unit.existing_doc is None:
                 prompt = build_docstring_prompt(
                     target_unit.name,
@@ -81,6 +86,10 @@ def run_pipeline(target_folder, format_check, convention_by_language):
                     docstring_result,
                 ]
             )
+            if on_progress:
+                unit_complete += 1
+    
+
 
         write_to_doc(file, unit_information)
         if format_check:

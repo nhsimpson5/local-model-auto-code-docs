@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QComboBox,
     QCheckBox,
+    QProgressBar,
 )
 from pipeline import run_pipeline, CONVENTION_BY_LANGUAGE
 
@@ -67,6 +68,7 @@ class folder_button(button):
 
 class PipelineWorker(QObject):
     finished = Signal()
+    progress = Signal(int, int, str)
     error = Signal(str)
 
     def __init__(self, target_folder, format_check, convention_by_language):
@@ -78,7 +80,7 @@ class PipelineWorker(QObject):
     def run(self):
         try:
             run_pipeline(
-                self.target_folder, self.format_check, self.convention_by_language
+                self.target_folder, self.format_check, self.convention_by_language, on_progress=self.progress.emit
             )
         except Exception as e:
             self.error.emit(str(e))
@@ -102,6 +104,7 @@ class run_button(button):
         self.python_dropdown = python_dropdown
         self.c_dropdown = c_dropdown
         self.cpp_dropdown = cpp_dropdown
+        self.docstring_progress_bar = None
         self.set_layout()
 
     def disable_button(self):
@@ -114,6 +117,9 @@ class run_button(button):
 
     def button_function(self):
         self.disable_button()
+        self.docstring_progress_bar = docstring_progress_bar
+        self.docstring_progress_bar.reset_bar()
+        self.docstring_progress_bar.show_bar()
         folder = self.folder_button.get_chosen_folder_file_path()
         format_check = self.format_check.get_status()
         conventions = {
@@ -127,8 +133,10 @@ class run_button(button):
         self.worker.moveToThread(self.thread)
 
         self.thread.started.connect(self.worker.run)
+        self.worker.progress.connect(self.docstring_progress_bar.update)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.enable_button)
+        self.worker.finished.connect(self.docstring_progress_bar.hide_bar)
         self.worker.error.connect(lambda msg: print(f"Pipeline failed: {msg}"))
 
         self.thread.start()
@@ -172,6 +180,39 @@ class format_check_box:
         return self.main.isChecked()
 
 
+class progress_bar:
+    def __init__(self, style=None):
+        style = QVBoxLayout()
+        self.main = QProgressBar()
+        self.title = QLabel("Progress: ")
+        self.main.setValue(0)
+        self.layout = style
+        self.set_layout(self.title, self.main)
+
+    def set_layout(self, *widgets):
+        for widget in widgets:
+            self.layout.addWidget(widget)
+        self.layout.addStretch()
+        layout.addLayout(self.layout)
+        self.hide_bar()
+
+    def hide_bar(self):
+        self.title.hide()
+        self.main.hide()
+
+    def show_bar(self):
+        self.title.show()  
+        self.main.show()
+
+    def reset_bar(self):
+        self.update(0, 1, "")
+
+    def update(self, current: int, total: int, message: str):
+        self.main.setRange(0, total)
+        self.main.setValue(current)
+        self.title.setText(f"Progress: {message}")
+
+        
 window.setWindowTitle("Auto Code Documentation & Formatting")
 folder_search_button = folder_button("Select Folder")
 format_code_check_box = format_check_box()
@@ -193,7 +234,8 @@ run_pipeline_button = run_button(
     c_convention_drop_down_menu,
     cpp_convention_drop_down_menu,
 )
-window.resize(250, 200)
+docstring_progress_bar = progress_bar()
+window.resize(400, 300)
 window.setLayout(layout)
 window.show()
 

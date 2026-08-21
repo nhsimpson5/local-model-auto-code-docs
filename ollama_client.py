@@ -38,6 +38,57 @@ Raises:
 """,
         ]
     },
+    "NumPy": {
+        "python": [
+            """
+def divide(a, b):
+    return a / b
+""",
+            """
+<<<DOCSTRING_START>>>
+Divides one number by another.
+
+Parameters
+----------
+a : float
+    The dividend.
+b : float
+    The divisor. Must not be zero.
+
+Returns
+-------
+float
+    The result of dividing a by b.
+
+Raises
+------
+ZeroDivisionError
+    If b is zero.
+<<<DOCSTRING_END>>>
+""",
+        ]
+    },
+    "Sphinx": {
+        "python": [
+            """
+def divide(a, b):
+    return a / b
+""",
+            """
+<<<DOCSTRING_START>>>
+Divides one number by another.
+
+:param a: The dividend.
+:type a: float
+:param b: The divisor. Must not be zero.
+:type b: float
+:returns: The result of dividing a by b.
+:rtype: float
+:raises ZeroDivisionError: If b is zero.
+<<<DOCSTRING_END>>>
+""",
+        ]
+    },
     "Doxygen": {
         "c": [
             """
@@ -78,6 +129,26 @@ double average(const std::vector<int>& values) {
 <<<DOCSTRING_END>>>
 """,
         ],
+    },
+    "Kernel-doc": {
+        "c": [
+            """
+int multiply(int a, int b) {
+    return a * b;
+}
+""",
+            """
+<<<DOCSTRING_START>>>
+/**
+ * multiply() - Multiplies two integers.
+ * @a: The first integer factor.
+ * @b: The second integer factor.
+ *
+ * Return: The product of a and b.
+ */
+<<<DOCSTRING_END>>>
+""",
+        ]
     },
 }
 
