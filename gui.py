@@ -80,7 +80,10 @@ class PipelineWorker(QObject):
     def run(self):
         try:
             run_pipeline(
-                self.target_folder, self.format_check, self.convention_by_language, on_progress=self.progress.emit
+                self.target_folder,
+                self.format_check,
+                self.convention_by_language,
+                on_progress=self.progress.emit,
             )
         except Exception as e:
             self.error.emit(str(e))
@@ -110,7 +113,7 @@ class run_button(button):
     def disable_button(self):
         self.main.setEnabled(False)
         self.main.setText("Running...")
-        
+
     def enable_button(self):
         self.main.setEnabled(True)
         self.main.setText("Run")
@@ -141,7 +144,7 @@ class run_button(button):
 
         self.thread.start()
 
- 
+
 class convention_drop_down_menu:
     def __init__(self, title: str, items: tuple, style=None):
         style = QHBoxLayout()
@@ -201,7 +204,7 @@ class progress_bar:
         self.main.hide()
 
     def show_bar(self):
-        self.title.show()  
+        self.title.show()
         self.main.show()
 
     def reset_bar(self):
@@ -212,7 +215,7 @@ class progress_bar:
         self.main.setValue(current)
         self.title.setText(f"Progress: {message}")
 
-        
+
 window.setWindowTitle("Auto Code Documentation & Formatting")
 folder_search_button = folder_button("Select Folder")
 format_code_check_box = format_check_box()
@@ -235,7 +238,7 @@ run_pipeline_button = run_button(
     cpp_convention_drop_down_menu,
 )
 docstring_progress_bar = progress_bar()
-window.resize(400, 300)
+window.resize(500,300)
 window.setLayout(layout)
 window.show()
 
