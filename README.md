@@ -2,7 +2,7 @@
 
 An AI-powered desktop tool that scans a codebase, generates documentation for
 undocumented functions, classes, and structs using a **local** LLM, and can
-reformat the code to match your preferred style — all running entirely on
+reformat the code to match preferred styles — all running entirely on
 your own machine. Your source code is never uploaded anywhere.
 
 ![Demo of the GUI scanning and documenting a folder](assets/demo.gif)
@@ -34,7 +34,7 @@ ever leaves your machine.
   review before you replace anything.
 - **PySide6 GUI** — pick a folder, choose a convention per language, tick a
   box to also format the code, and watch a live per-file progress bar while
-  it runs on a background thread (the UI never freezes).
+  it runs.
 - **Skips what's already documented** — Python functions/classes that
   already have a docstring are left alone rather than being overwritten
   (see [Known limitations](#known-limitations) for the current C/C++ gap).
