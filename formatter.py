@@ -16,7 +16,7 @@ def format_file(file_path: str, language: str) -> str:
             with open(file_path, "r", encoding="utf-8") as f:
                 source_code = f.read()
             result = subprocess.run(
-                ["black", "-", "--quiet"],
+                [BLACK_CMD, "-", "--quiet"],
                 input=source_code,
                 capture_output=True,
                 text=True,
@@ -24,7 +24,7 @@ def format_file(file_path: str, language: str) -> str:
             )
         else:
             result = subprocess.run(
-                ["clang-format", file_path],
+                [CLANG_FORMAT_CMD, file_path],
                 capture_output=True,
                 text=True,
                 encoding="utf-8",
