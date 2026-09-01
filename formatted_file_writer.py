@@ -5,9 +5,13 @@ writes the formatted files to the "formatted_files" folder keeping
 their original names ready for replacing the originals
 """
 
+import sys
 import os
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, "frozen", False):
+    ROOT = os.path.dirname(sys.executable)
+else:
+    ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 def setup_formatted_folder():

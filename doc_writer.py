@@ -6,9 +6,13 @@ files keep their original name and extensions to deal with duplicate names acros
 different file types
 """
 
+import sys
 import os
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, "frozen", False):
+    ROOT = os.path.dirname(sys.executable)
+else:
+    ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 def setup_docs_folder():

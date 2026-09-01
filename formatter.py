@@ -1,4 +1,13 @@
 import subprocess
+import sys
+import os
+
+if getattr(sys, "frozen", False):
+    BLACK_CMD = os.path.join(sys._MEIPASS, "black.exe")
+    CLANG_FORMAT_CMD = os.path.join(sys._MEIPASS, "clang-format.exe")
+else:
+    BLACK_CMD = "black"
+    CLANG_FORMAT_CMD = "clang-format"
 
 
 def format_file(file_path: str, language: str) -> str:

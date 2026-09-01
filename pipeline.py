@@ -21,13 +21,20 @@ from formatter import format_file
 from formatted_file_writer import setup_formatted_folder, write_to_formatted_folder
 
 CONVENTION_BY_LANGUAGE = {
-    "python": ("Google", "NumPy", "Sphinx",),
-    "c": ("Doxygen", "Kernel-doc",),
+    "python": (
+        "Google",
+        "NumPy",
+        "Sphinx",
+    ),
+    "c": (
+        "Doxygen",
+        "Kernel-doc",
+    ),
     "cpp": ("Doxygen",),
 }
 
 
-def run_pipeline(target_folder, format_check, convention_by_language, on_progress = None):
+def run_pipeline(target_folder, format_check, convention_by_language, on_progress=None):
     units_by_file = {}
 
     print(f"Scanning: {target_folder}\n")
@@ -62,7 +69,11 @@ def run_pipeline(target_folder, format_check, convention_by_language, on_progres
         unit_information = []
         for target_unit in units_by_file[file]:
             if on_progress:
-                on_progress(unit_complete, unit_total, f"Generating docstring - {target_unit.name} [{target_unit.kind}] [{os.path.basename(file)}]")
+                on_progress(
+                    unit_complete,
+                    unit_total,
+                    f"Generating docstring - {target_unit.name} [{target_unit.kind}] [{os.path.basename(file)}]",
+                )
             if target_unit.existing_doc is None:
                 prompt = build_docstring_prompt(
                     target_unit.name,
@@ -88,8 +99,6 @@ def run_pipeline(target_folder, format_check, convention_by_language, on_progres
             )
             if on_progress:
                 unit_complete += 1
-    
-
 
         write_to_doc(file, unit_information)
         if format_check:
