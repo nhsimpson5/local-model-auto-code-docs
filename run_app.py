@@ -26,4 +26,5 @@ if sys.stdout is None:
 if sys.stderr is None:
     sys.stderr = open(os.devnull, "w")
 
+
 import gui  # noqa: E402,F401  (gui.py builds and runs the window at import time)
